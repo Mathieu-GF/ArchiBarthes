@@ -1,4 +1,4 @@
-onnecteur Heurist — ArchiBarthes
+Connecteur Heurist — ArchiBarthes
 
 Ce dossier conserve une copie du chargeur JavaScript installé dans la page Atlas du CMS Heurist.
 
