@@ -18,7 +18,7 @@
   async function start() {
     try {
       await load('atlas/core.js');
-      await load('personnes.js');
+      await load('atlas/personnes.js');
       console.info('ArchiBarthes : Atlas chargé depuis GitHub Pages');
     } catch (error) {
       console.error('ArchiBarthes : erreur de chargement', error);
