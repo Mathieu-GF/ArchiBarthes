@@ -1,11 +1,12 @@
-/* ArchiBarthes — Module « Le monde des noms » — V4.7, à ajouter en 2e valeur
-   de « Custom Javascript for this page », APRÈS la V4.6.1 validée.
+/* ArchiBarthes — Module « Le monde des noms » — V4.8 : noms visibles.
+   Chargé depuis atlas/main.js sur GitHub Pages.
    Lecture seule : Fiche 102 / Personnes 10 / pointeur 16 / catégorie 263 / date 9.
 */
 (function(){
 'use strict';
 const ROOT='#archibarthes-atlas', API='/heurist/hserv/controller/record_search.php';
-const COLORS={amis:'#648ba7',intimes:'#a56c6b',auteurs:'#789c91',autres:'#97aebc'};
+const VISIBLE_LABELS=12; // Noms permanents : les 12 personnes les plus citées dans la sélection.
+ const COLORS={amis:'#648ba7',intimes:'#a56c6b',auteurs:'#789c91',autres:'#97aebc'};
 const CATEGORY={amis:['6967'],intimes:['6966','7562','7558'],auteurs:['5433','7553','5434']};
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const get=(r,id)=>{let x=r.d?.[id];return Array.isArray(x)?x:x==null?[]:[x];};
@@ -52,7 +53,8 @@ function init(){
  #archibarthes-atlas #relations .abn-detail strong{color:#1f4a64;font:20px Georgia,serif}
  #archibarthes-atlas #relations .abn-tip{display:none;position:fixed;z-index:2147483000;pointer-events:none;background:#173d54;color:white;padding:9px 12px;border-radius:3px;box-shadow:0 3px 14px #092a3833;font:12px/1.5 Arial,sans-serif;max-width:290px}
  #archibarthes-atlas #relations .abn-msg{color:#58768a;font:14px/1.6 Arial,sans-serif;padding:25px}
- #archibarthes-atlas #relations .abn-node{cursor:grab;outline:none}
+ #archibarthes-atlas #relations .abn-label{font:13px Georgia,serif;fill:#23455c;paint-order:stroke;stroke:#f7fafb;stroke-width:4px;stroke-linejoin:round;pointer-events:none}
+  #archibarthes-atlas #relations .abn-node{cursor:grab;outline:none}
  #archibarthes-atlas #relations .abn-node:focus circle{stroke:#a85651;stroke-width:4}
  @media(max-width:760px){#archibarthes-atlas #relations .abn-toolbar{justify-content:flex-start}#archibarthes-atlas #relations .abn-panel{padding:9px}#archibarthes-atlas #relations .abn-graph{min-height:220px}}
  @media(prefers-reduced-motion:reduce){#archibarthes-atlas #relations .abn-btn{transition:none}}
@@ -72,7 +74,7 @@ function init(){
  function labelGroup(p){return ['amis','intimes','auteurs'].find(group=>belongs(p,group))||'autres';}
  function countFor(p,year){return year==='all'?p.all.size:(p.years.get(Number(year))?.size||0);}
  function categoryNames(p){return p.cats.map(id=>window.$Db?.getTermValue?.(id)||id).join(' · ')||'Sans catégorie';}
- function nodeRadius(count,max){return 7+Math.sqrt(count/Math.max(max,1))*31;}
+ function nodeRadius(count,max){return 6+Math.sqrt(count/Math.max(max,1))*28;}
  function tooltip(ev,n){tip.innerHTML='<strong>'+esc(n.name)+'</strong><br>'+n.count+' fiche'+(n.count>1?'s':'')+' · '+(state.year==='all'?'Toutes dates':state.year);tip.style.display='block';moveTip(ev);}
  function moveTip(ev){tip.style.left=Math.max(6,Math.min(ev.clientX+16,innerWidth-tip.offsetWidth-12))+'px';tip.style.top=Math.max(6,ev.clientY-tip.offsetHeight-12)+'px';}
  function hideTip(){tip.style.display='none';}
@@ -95,11 +97,36 @@ function init(){
    return {...p,r:nodeRadius(p.count,largest),x:CX+Math.cos(t)*dist,y:CY+Math.sin(t)*dist,vx:0,vy:0,color:COLORS[labelGroup(p.person)]};});
   const lines=nodes.map(n=>'<line data-edge="'+esc(n.id)+'" x1="'+CX+'" y1="'+CY+'" x2="'+n.x+'" y2="'+n.y+'" stroke="#a8becb" stroke-width="1.2" opacity=".48"/>').join('');
   const circles=nodes.map(n=>'<g class="abn-node" tabindex="0" role="button" aria-label="'+esc(n.name)+', '+n.count+' fiches" data-id="'+esc(n.id)+'" transform="translate('+n.x+' '+n.y+')"><circle r="'+n.r.toFixed(2)+'" fill="'+n.color+'" stroke="#fff" stroke-width="2"/><title>'+esc(n.name)+' · '+n.count+' fiches</title></g>').join('');
-  graph.innerHTML='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Constellation des personnes mentionnées dans le fichier, Roland Barthes au centre"><g class="abn-edges">'+lines+'</g><g class="abn-nodes">'+circles+'</g><g pointer-events="none"><circle cx="'+CX+'" cy="'+CY+'" r="49" fill="#173d55" stroke="white" stroke-width="4"/><text x="'+CX+'" y="'+(CY-5)+'" fill="white" font-family="Georgia,serif" font-size="21" text-anchor="middle">Roland</text><text x="'+CX+'" y="'+(CY+18)+'" fill="white" font-family="Georgia,serif" font-size="21" text-anchor="middle">Barthes</text></g></svg>';
+  const labelled=nodes.slice(0,VISIBLE_LABELS);
+   const labels=labelled.map(n=>'<text class="abn-label" data-label="'+esc(n.id)+'" aria-hidden="true">'+esc(n.name)+'</text>').join('');
+   graph.innerHTML='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Constellation des personnes mentionnées dans le fichier, Roland Barthes au centre"><g class="abn-edges">'+lines+'</g><g class="abn-nodes">'+circles+'</g><g class="abn-labels" pointer-events="none">'+labels+'</g><g pointer-events="none"><circle cx="'+CX+'" cy="'+CY+'" r="49" fill="#173d55" stroke="white" stroke-width="4"/><text x="'+CX+'" y="'+(CY-5)+'" fill="white" font-family="Georgia,serif" font-size="21" text-anchor="middle">Roland</text><text x="'+CX+'" y="'+(CY+18)+'" fill="white" font-family="Georgia,serif" font-size="21" text-anchor="middle">Barthes</text></g></svg>';
   stage=graph.querySelector('svg');
   const els=new Map([...graph.querySelectorAll('.abn-node')].map(el=>[el.dataset.id,el]));
   const edges=new Map([...graph.querySelectorAll('[data-edge]')].map(el=>[el.dataset.edge,el]));
-  function paint(){for(const n of nodes){els.get(n.id)?.setAttribute('transform','translate('+n.x.toFixed(2)+' '+n.y.toFixed(2)+')');const edge=edges.get(n.id);if(edge){edge.setAttribute('x2',n.x.toFixed(2));edge.setAttribute('y2',n.y.toFixed(2));}}}
+   const labelEls=new Map([...graph.querySelectorAll('[data-label]')].map(el=>[el.dataset.label,el]));
+   // Priorité aux noms les plus présents ; éviter les collisions avec cercles et étiquettes.
+   // Les étiquettes suivent les nœuds au cours de la simulation et du déplacement manuel.
+   function paintLabels(){
+    const occupied=[];
+    for(const n of labelled){
+     const el=labelEls.get(n.id);if(!el)continue;
+     const width=Math.min(240,Math.max(38,n.name.length*6.7));
+     const side=n.x>=CX?1:-1;
+     let chosen=null;
+     for(const vertical of [0,-18,18,-36,36,-54,54]){
+      const x=side>0?n.x+n.r+9:n.x-n.r-9-width;
+      const y=n.y+vertical-9;
+      const rect={x:Math.max(5,Math.min(W-width-5,x)),y:Math.max(5,Math.min(H-19,y)),w:width,h:18};
+      const overlap=occupied.some(b=>rect.x<b.x+b.w+5&&rect.x+rect.w+5>b.x&&rect.y<b.y+b.h+3&&rect.y+rect.h+3>b.y);
+      const circlesHit=nodes.some(other=>other.id!==n.id&&other.x>rect.x-10&&other.x<rect.x+rect.w+10&&other.y>rect.y-10&&other.y<rect.y+rect.h+10&&Math.hypot(other.x-Math.max(rect.x,Math.min(other.x,rect.x+rect.w)),other.y-Math.max(rect.y,Math.min(other.y,rect.y+rect.h)))<other.r+3);
+      const centerHit= Math.hypot(CX-Math.max(rect.x,Math.min(CX,rect.x+rect.w)),CY-Math.max(rect.y,Math.min(CY,rect.y+rect.h)))<53;
+      if(!overlap&&!circlesHit&&!centerHit){chosen=rect;break;}
+     }
+     if(chosen){el.setAttribute('x',chosen.x);el.setAttribute('y',chosen.y+14);el.style.display='';occupied.push(chosen);}
+     else el.style.display='none';
+    }
+   }
+   function paint(){for(const n of nodes){els.get(n.id)?.setAttribute('transform','translate('+n.x.toFixed(2)+' '+n.y.toFixed(2)+')');const edge=edges.get(n.id);if(edge){edge.setAttribute('x2',n.x.toFixed(2));edge.setAttribute('y2',n.y.toFixed(2));}}paintLabels();}
   function tick(){
    const stop=alpha<.012&&!drag;
    if(stop){paint();return;}
@@ -148,7 +175,7 @@ function init(){
   }
   for(let y=1968;y<=1980;y++)yearInput.insertAdjacentHTML('beforeend','<option value="'+y+'">'+y+'</option>');
   section.querySelector('#abnFoot').textContent=fr.length+' fiches · '+people.size+' notices personnes';
-  console.info('ArchiBarthes : constellation V4.7 chargée',{fiches:fr.length,personnes:people.size,associations:linked,pointeursSansNotice:unlinked});
+  console.info('ArchiBarthes : constellation V4.8 chargée',{fiches:fr.length,personnes:people.size,associations:linked,pointeursSansNotice:unlinked});
   build();
  }catch(err){graph.innerHTML='<div class="abn-msg">Constellation indisponible : '+esc(err.message)+'</div>';console.error('ArchiBarthes constellation',err);}}
  load();
