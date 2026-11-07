@@ -1,4 +1,4 @@
-/* ArchiBarthes — Module « Le monde des noms » — V4.10.1 : notices latérales et HTML sécurisé.
+/* ArchiBarthes — Module « Le monde des noms » — V4.11 : notices latérales et HTML sécurisé.
    Module expérimental chargé par atlas/main-test.js.
    Lecture seule : Fiche 102 / Personnes 10 / pointeur 16 / catégorie 263 / description 3 / date 9.
 */
@@ -6,8 +6,8 @@
 'use strict';
 const ROOT='#archibarthes-atlas', API='/heurist/hserv/controller/record_search.php';
 const VISIBLE_LABELS=12; // Noms permanents : les 12 personnes les plus citées dans la sélection.
- const COLORS={amis:'#648ba7',intimes:'#a56c6b',auteurs:'#789c91',autres:'#97aebc'};
-const CATEGORY={amis:['6967'],intimes:['6966','7562','7558'],auteurs:['5433','7553','5434']};
+ const COLORS={amis:'#648ba7',etudiants:'#789c91',famille:'#a56c6b',autres:'#97aebc'};
+const CATEGORY={amis:['6967'],etudiants:['7237'],famille:['6966']};
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const get=(r,id)=>{let x=r.d?.[id];return Array.isArray(x)?x:x==null?[]:[x];};
 function parseYear(values){
@@ -100,11 +100,11 @@ function init(){
  @media(max-width:760px){#archibarthes-atlas #relations .abn-toolbar{justify-content:flex-start}#archibarthes-atlas #relations .abn-panel{padding:9px}#archibarthes-atlas #relations .abn-graph{min-height:220px}}
  @media(prefers-reduced-motion:reduce){#archibarthes-atlas #relations .abn-btn{transition:none}}
  `;document.head.appendChild(style);
- section.innerHTML=`<div class="wrap"><div class="section-head"><div><div class="eyebrow">06 / Personnes et présences</div><h2>Le monde des noms</h2></div><div class="abn-toolbar"><div class="abn-tabs" role="group" aria-label="Constellations de personnes"><button class="abn-btn" data-abn-tab="amis" aria-pressed="true">Amis</button><button class="abn-btn" data-abn-tab="intimes">Famille et proches</button><button class="abn-btn" data-abn-tab="auteurs">Écrivains et penseurs</button><button class="abn-btn" data-abn-tab="tous">Tous les noms</button></div></div></div><p class="intro">Autour de Roland Barthes, les personnes mentionnées dans le Grand Fichier. Chaque cercle représente une notice de personne ; sa <strong>surface</strong> traduit le nombre de fiches distinctes où elle apparaît. Les traits indiquent seulement cette présence documentaire.</p><div class="abn-panel"><div class="abn-filters"><label for="abnYear">Période</label><select id="abnYear"><option value="all">1968–1980</option></select><label for="abnLimit">Afficher</label><select id="abnLimit"><option value="40">40 noms</option><option value="75" selected>75 noms</option><option value="120">120 noms</option><option value="9999">Tous les noms</option></select><label for="abnSearch">Rechercher</label><input id="abnSearch" type="search" placeholder="Nom de personne" autocomplete="off"></div><div id="abnKpis" class="abn-kpis" aria-live="polite"></div><div id="abnGraph" class="abn-graph"><div class="abn-msg">Chargement des notices et des fiches Heurist…</div></div><div class="abn-foot"><span>Déplacer les cercles à la souris · Survoler ou sélectionner un nom</span><span id="abnFoot">Données Heurist</span></div></div><p class="note">Les catégories de personnes peuvent se recouper. Une même personne n'est comptée qu'une fois par fiche. Un lien vers Barthes ne préjuge ni d'une amitié ni d'une relation personnelle. Les fiches sans date annuelle univoque sont comprises dans le total général, mais pas dans les vues annuelles.</p></div>`;
- const graph=section.querySelector('#abnGraph'), kpis=section.querySelector('#abnKpis'),yearInput=section.querySelector('#abnYear'),limitInput=section.querySelector('#abnLimit'),searchInput=section.querySelector('#abnSearch');
+ section.innerHTML=`<div class="wrap"><div class="section-head"><div><div class="eyebrow">06 / Personnes et présences</div><h2>Le monde des noms</h2></div><div class="abn-toolbar"><div class="abn-tabs" role="group" aria-label="Constellations de personnes"><button class="abn-btn" data-abn-tab="amis" aria-pressed="true">Ami.e.s</button><button class="abn-btn" data-abn-tab="etudiants">Étudiant.e.s</button><button class="abn-btn" data-abn-tab="famille">Famille</button><button class="abn-btn" data-abn-tab="tous">Toutes les présences</button></div></div></div><p class="intro">Autour de Roland Barthes, un monde de présences : ami.e.s, étudiant.e.s et membres de sa famille. Chaque cercle représente une personne mentionnée dans le Grand Fichier ; sa <strong>surface</strong> traduit le nombre de fiches distinctes où elle apparaît. Les traits indiquent uniquement cette présence documentaire.</p><div class="abn-panel"><div class="abn-filters"><label for="abnYear">Période</label><select id="abnYear"><option value="all">1968–1980</option></select><label for="abnSearch">Rechercher</label><input id="abnSearch" type="search" placeholder="Nom de personne" autocomplete="off"></div><div id="abnKpis" class="abn-kpis" aria-live="polite"></div><div id="abnGraph" class="abn-graph"><div class="abn-msg">Chargement des notices et des fiches Heurist…</div></div><div class="abn-foot"><span>Déplacer les cercles à la souris · Survoler ou sélectionner un nom</span><span id="abnFoot">Données Heurist</span></div></div><p class="note">Les catégories de personnes peuvent se recouper. La vue « Toutes les présences » réunit uniquement ami.e.s, étudiant.e.s et famille, sans inclure les auteurs simplement cités. Une même personne n'est comptée qu'une fois par fiche. Les liens indiquent une présence documentaire, non une proximité affective. Les fiches sans date annuelle univoque sont comprises dans le total général, mais pas dans les vues annuelles.</p></div>`;
+ const graph=section.querySelector('#abnGraph'), kpis=section.querySelector('#abnKpis'),yearInput=section.querySelector('#abnYear'),searchInput=section.querySelector('#abnSearch');
  const detail=document.createElement('aside');detail.id='abnDetail';detail.className='abn-detail';detail.setAttribute('aria-hidden','true');graph.appendChild(detail);
  const tip=document.createElement('div');tip.className='abn-tip';section.appendChild(tip);
- let state={tab:'amis',year:'all',max:75,search:''},people=new Map(),indexed=[],categoryMap=new Map(),rendered=[],nodes=[],raf=0,stage=null,selected=null,drag=null,alpha=0;
+ let state={tab:'amis',year:'all',search:''},people=new Map(),indexed=[],categoryMap=new Map(),rendered=[],nodes=[],raf=0,stage=null,selected=null,drag=null,alpha=0;
  const W=920,H=590,CX=W/2,CY=H/2;
  function descendants(){
   const tree=window.$Db?.trm_TreeData?.('5432','tree');
@@ -112,11 +112,11 @@ function init(){
   function visit(node,anc){const id=String(node.key),set=new Set([...anc,id]);categoryMap.set(id,set);for(const c of node.children||[])visit(c,set);}
   tree.forEach(n=>visit(n,[]));
  }
- function belongs(person,group){if(group==='tous')return true;return person.cats.some(id=>[...categoryMap.get(id)||[id]].some(t=>CATEGORY[group].includes(t)));}
- function labelGroup(p){return ['amis','intimes','auteurs'].find(group=>belongs(p,group))||'autres';}
+ function belongs(person,group){if(group==='tous')return ['amis','etudiants','famille'].some(g=>belongs(person,g));return person.cats.some(id=>[...categoryMap.get(id)||[id]].some(t=>CATEGORY[group].includes(t)));}
+ function labelGroup(p){return ['amis','etudiants','famille'].find(group=>belongs(p,group))||'autres';}
  function countFor(p,year){return year==='all'?p.all.size:(p.years.get(Number(year))?.size||0);}
  function categoryNames(p){return p.cats.map(id=>window.$Db?.getTermValue?.(id)||id).join(' · ')||'Sans catégorie';}
- function nodeRadius(count,max){return 6+Math.sqrt(count/Math.max(max,1))*28;}
+ function nodeRadius(count,max){return 3.8+Math.sqrt(count/Math.max(max,1))*26;}
  function tooltip(ev,n){tip.innerHTML='<strong>'+esc(n.name)+'</strong><br>'+n.count+' fiche'+(n.count>1?'s':'')+' · '+(state.year==='all'?'Toutes dates':state.year);tip.style.display='block';moveTip(ev);}
  function moveTip(ev){tip.style.left=Math.max(6,Math.min(ev.clientX+16,innerWidth-tip.offsetWidth-12))+'px';tip.style.top=Math.max(6,ev.clientY-tip.offsetHeight-12)+'px';}
  function hideTip(){tip.style.display='none';}
@@ -145,11 +145,11 @@ function init(){
   let list=[...people.values()].filter(p=>belongs(p,state.tab)).map(p=>({id:p.id,name:p.name,person:p,count:countFor(p,state.year)})).filter(p=>p.count>0).sort((a,b)=>b.count-a.count||a.name.localeCompare(b.name,'fr'));
   const total=list.length, match=state.search.trim().toLocaleLowerCase('fr');
   if(match)list=list.filter(p=>p.name.toLocaleLowerCase('fr').includes(match));
-  list=list.slice(0,state.max);
+  // Toutes les personnes correspondant à la sélection sont affichées, même avec une seule fiche.
   const largest=Math.max(1,...list.map(p=>p.count));
   rendered=list;
   kpis.innerHTML='<div><strong>'+total.toLocaleString('fr-FR')+'</strong>personnes indexées</div><div><strong>'+list.length.toLocaleString('fr-FR')+'</strong>cercles affichés</div><div><strong>'+list.reduce((s,p)=>s+p.count,0).toLocaleString('fr-FR')+'</strong>associations fiche–personne affichées</div>';
-  section.querySelector('#abnFoot').textContent=state.year==='all'?'Toutes dates · maximum '+state.max+' cercles':'Année '+state.year+' · maximum '+state.max+' cercles';
+  section.querySelector('#abnFoot').textContent=state.year==='all'?'Toutes dates · ensemble des présences':'Année '+state.year+' · ensemble des présences';
   if(!list.length){graph.replaceChildren();graph.innerHTML='<div class="abn-msg">Aucune personne indexée pour cette sélection.</div>';graph.appendChild(detail);showDetail(null);return;}
   // Positions initiales déterministes, légèrement décalées : aucune relation entre périphériques.
   nodes=list.map((p,i)=>{const t=i*2.399963229728653,dist=95+Math.sqrt((i+.5)/list.length)*160;
@@ -213,7 +213,7 @@ function init(){
    }
    for(let i=0;i<nodes.length;i++)for(let j=i+1;j<nodes.length;j++){
     const a=nodes[i],b=nodes[j];let dx=a.x-b.x,dy=a.y-b.y,d=Math.hypot(dx,dy)||.01;
-    const want=a.r+b.r+6,near=Math.max(want,80),force=d<want?(want-d)*.066:d<near?(near-d)*.002:0;
+    const want=a.r+b.r+3,near=Math.max(want,35),force=d<want?(want-d)*.066:d<near?(near-d)*.002:0;
     if(force){const fx=dx/d*force,fy=dy/d*force;if(drag!==a.id){a.vx+=fx;a.vy+=fy;}if(drag!==b.id){b.vx-=fx;b.vy-=fy;}}
    }
    for(const n of nodes){if(drag===n.id)continue;n.vx*=.83;n.vy*=.83;n.x=Math.max(n.r+4,Math.min(W-n.r-4,n.x+n.vx));n.y=Math.max(n.r+4,Math.min(H-n.r-4,n.y+n.vy));}
@@ -236,7 +236,7 @@ function init(){
  }
  section.addEventListener('click',e=>{const button=e.target.closest('[data-abn-tab]');if(!button)return;state.tab=button.dataset.abnTab;section.querySelectorAll('[data-abn-tab]').forEach(x=>x.setAttribute('aria-pressed',String(x===button)));build();});
  yearInput.addEventListener('change',()=>{state.year=yearInput.value;build();});
- limitInput.addEventListener('change',()=>{state.max=Number(limitInput.value);build();});
+
  searchInput.addEventListener('input',()=>{state.search=searchInput.value;build();});
  window.addEventListener('scroll',hideTip,{passive:true});
  async function load(){try{
