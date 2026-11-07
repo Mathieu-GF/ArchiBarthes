@@ -1,4 +1,4 @@
-/* ArchiBarthes — Module « Le monde des noms » — V4.9 : noms visibles.
+/* ArchiBarthes — Module « Le monde des noms » — V4.10 : notices latérales et HTML sécurisé.
    Module expérimental chargé par atlas/main-test.js.
    Lecture seule : Fiche 102 / Personnes 10 / pointeur 16 / catégorie 263 / description 3 / date 9.
 */
@@ -28,6 +28,34 @@ async function fetchType(type,fields){
  if(data.status!=='ok'||!data.data?.records)throw Error(data.message||'Réponse API inattendue');
  return Object.values(data.data.records);
 }
+// HTML éditorial Heurist : seules les balises de mise en forme autorisées sont conservées.
+function safeBiography(raw){
+ const doc=new DOMParser().parseFromString('<div>'+String(raw||'')+'</div>','text/html');
+ const allowed=new Set(['P','BR','EM','I','STRONG','B','U','UL','OL','LI','A','BLOCKQUOTE','SPAN','SUP','SUB']);
+ function clean(node){
+  if(node.nodeType===Node.TEXT_NODE)return document.createTextNode(node.textContent);
+  if(node.nodeType!==Node.ELEMENT_NODE)return document.createDocumentFragment();
+  const fragment=document.createDocumentFragment();
+  if(!allowed.has(node.tagName)){
+   // Aucun contenu actif (scripts, styles, formulaires, SVG, etc.) ne doit passer.
+   if(['SCRIPT','STYLE','IFRAME','OBJECT','EMBED','SVG','MATH','FORM','TEMPLATE'].includes(node.tagName))return fragment;
+   [...node.childNodes].forEach(child=>fragment.appendChild(clean(child)));
+   return fragment;
+  }
+  const el=document.createElement(node.tagName.toLowerCase());
+  if(node.tagName==='A'){
+   const href=node.getAttribute('href')||'';
+   try{const url=new URL(href,location.href);if(['https:','http:','mailto:'].includes(url.protocol)){
+    el.setAttribute('href',url.href);el.setAttribute('target','_blank');el.setAttribute('rel','noopener noreferrer');
+   }}catch(_){}
+  }
+  [...node.childNodes].forEach(child=>el.appendChild(clean(child)));
+  return el;
+ }
+ const out=document.createElement('div');
+ [...doc.body.firstElementChild.childNodes].forEach(child=>out.appendChild(clean(child)));
+ return out.innerHTML;
+}
 function init(){
  const root=document.querySelector(ROOT),section=root?.querySelector('#relations');
  // Ancienne démonstration thématique « Constellations » (section #themes).
@@ -55,7 +83,7 @@ function init(){
  #archibarthes-atlas #relations .abn-kpis{display:flex;flex-wrap:wrap;gap:20px;margin:10px 0 15px;color:#547185;font:12px Arial,sans-serif}
  #archibarthes-atlas #relations .abn-kpis strong{display:block;color:#183e55;font:27px Georgia,serif;margin-bottom:5px}
  #archibarthes-atlas #relations .abn-detail{margin-top:14px;border-top:1px solid #e3ebef;padding-top:14px;min-height:50px;font:13px/1.6 Arial,sans-serif;color:#516f82}
- #archibarthes-atlas #relations .abn-detail .abn-description{margin:10px 0 12px;white-space:pre-line;color:#304f62;font:14px/1.65 Arial,sans-serif;max-width:850px}
+ #archibarthes-atlas #relations .abn-detail .abn-description{margin:10px 0 12px;white-space:normal;color:#304f62;font:14px/1.65 Arial,sans-serif;max-width:850px}
   #archibarthes-atlas #relations .abn-detail .abn-count{font:12px/1.6 Arial,sans-serif;color:#627d8d}
   #archibarthes-atlas #relations .abn-detail strong{color:#1f4a64;font:20px Georgia,serif}
  #archibarthes-atlas #relations .abn-tip{display:none;position:fixed;z-index:2147483000;pointer-events:none;background:#173d54;color:white;padding:9px 12px;border-radius:3px;box-shadow:0 3px 14px #092a3833;font:12px/1.5 Arial,sans-serif;max-width:290px}
@@ -66,8 +94,8 @@ function init(){
  @media(max-width:760px){#archibarthes-atlas #relations .abn-toolbar{justify-content:flex-start}#archibarthes-atlas #relations .abn-panel{padding:9px}#archibarthes-atlas #relations .abn-graph{min-height:220px}}
  @media(prefers-reduced-motion:reduce){#archibarthes-atlas #relations .abn-btn{transition:none}}
  `;document.head.appendChild(style);
- section.innerHTML=`<div class="wrap"><div class="section-head"><div><div class="eyebrow">06 / Personnes et présences</div><h2>Le monde des noms</h2></div><div class="abn-toolbar"><div class="abn-tabs" role="group" aria-label="Constellations de personnes"><button class="abn-btn" data-abn-tab="amis" aria-pressed="true">Amis</button><button class="abn-btn" data-abn-tab="intimes">Famille et proches</button><button class="abn-btn" data-abn-tab="auteurs">Écrivains et penseurs</button><button class="abn-btn" data-abn-tab="tous">Tous les noms</button></div></div></div><p class="intro">Autour de Roland Barthes, les personnes mentionnées dans le Grand Fichier. Chaque cercle représente une notice de personne ; sa <strong>surface</strong> traduit le nombre de fiches distinctes où elle apparaît. Les traits indiquent seulement cette présence documentaire.</p><div class="abn-panel"><div class="abn-filters"><label for="abnYear">Période</label><select id="abnYear"><option value="all">1968–1980</option></select><label for="abnLimit">Afficher</label><select id="abnLimit"><option value="40">40 noms</option><option value="75" selected>75 noms</option><option value="120">120 noms</option><option value="9999">Tous les noms</option></select><label for="abnSearch">Rechercher</label><input id="abnSearch" type="search" placeholder="Nom de personne" autocomplete="off"></div><div id="abnKpis" class="abn-kpis" aria-live="polite"></div><div id="abnGraph" class="abn-graph"><div class="abn-msg">Chargement des notices et des fiches Heurist…</div></div><div class="abn-foot"><span>Déplacer les cercles à la souris · Survoler ou sélectionner un nom</span><span id="abnFoot">Données Heurist</span></div><div id="abnDetail" class="abn-detail" aria-live="polite">Sélectionnez un cercle pour connaître sa présence dans le fichier.</div></div><p class="note">Les catégories de personnes peuvent se recouper. Une même personne n'est comptée qu'une fois par fiche. Un lien vers Barthes ne préjuge ni d'une amitié ni d'une relation personnelle. Les fiches sans date annuelle univoque sont comprises dans le total général, mais pas dans les vues annuelles.</p></div>`;
- const graph=section.querySelector('#abnGraph'), kpis=section.querySelector('#abnKpis'),detail=section.querySelector('#abnDetail'),yearInput=section.querySelector('#abnYear'),limitInput=section.querySelector('#abnLimit'),searchInput=section.querySelector('#abnSearch');
+ section.innerHTML=`<div class="wrap"><div class="section-head"><div><div class="eyebrow">06 / Personnes et présences</div><h2>Le monde des noms</h2></div><div class="abn-toolbar"><div class="abn-tabs" role="group" aria-label="Constellations de personnes"><button class="abn-btn" data-abn-tab="amis" aria-pressed="true">Amis</button><button class="abn-btn" data-abn-tab="intimes">Famille et proches</button><button class="abn-btn" data-abn-tab="auteurs">Écrivains et penseurs</button><button class="abn-btn" data-abn-tab="tous">Tous les noms</button></div></div></div><p class="intro">Autour de Roland Barthes, les personnes mentionnées dans le Grand Fichier. Chaque cercle représente une notice de personne ; sa <strong>surface</strong> traduit le nombre de fiches distinctes où elle apparaît. Les traits indiquent seulement cette présence documentaire.</p><div class="abn-panel"><div class="abn-filters"><label for="abnYear">Période</label><select id="abnYear"><option value="all">1968–1980</option></select><label for="abnLimit">Afficher</label><select id="abnLimit"><option value="40">40 noms</option><option value="75" selected>75 noms</option><option value="120">120 noms</option><option value="9999">Tous les noms</option></select><label for="abnSearch">Rechercher</label><input id="abnSearch" type="search" placeholder="Nom de personne" autocomplete="off"></div><div id="abnKpis" class="abn-kpis" aria-live="polite"></div><div id="abnGraph" class="abn-graph"><div class="abn-msg">Chargement des notices et des fiches Heurist…</div></div><div class="abn-foot"><span>Déplacer les cercles à la souris · Survoler ou sélectionner un nom</span><span id="abnFoot">Données Heurist</span></div></div><p class="note">Les catégories de personnes peuvent se recouper. Une même personne n'est comptée qu'une fois par fiche. Un lien vers Barthes ne préjuge ni d'une amitié ni d'une relation personnelle. Les fiches sans date annuelle univoque sont comprises dans le total général, mais pas dans les vues annuelles.</p></div>`;
+ const graph=section.querySelector('#abnGraph'), kpis=section.querySelector('#abnKpis'),yearInput=section.querySelector('#abnYear'),limitInput=section.querySelector('#abnLimit'),searchInput=section.querySelector('#abnSearch');
  const tip=document.createElement('div');tip.className='abn-tip';section.appendChild(tip);
  let state={tab:'amis',year:'all',max:75,search:''},people=new Map(),indexed=[],categoryMap=new Map(),rendered=[],nodes=[],raf=0,stage=null,selected=null,drag=null,alpha=0;
  const W=920,H=590,CX=W/2,CY=H/2;
@@ -91,12 +119,19 @@ function init(){
    const description=n.person.description.trim();
    const count=n.count.toLocaleString('fr-FR');
    const period=state.year==='all'?'toutes dates':'en '+state.year;
-   detail.innerHTML='<strong>'+esc(n.name)+'</strong>'+
-    (description?'<p class="abn-description">'+esc(description)+'</p>':'<p class="abn-description">Aucune description renseignée.</p>')+
+   detail.innerHTML='<div class="abn-detail-head"><span class="abn-detail-kicker">Notice biographique</span><button type="button" class="abn-close" aria-label="Fermer la notice">×</button></div>'+ 
+    '<strong class="abn-name">'+esc(n.name)+'</strong>'+
+    (description?'<div class="abn-description">'+safeBiography(description)+'</div>':'<p class="abn-description">Aucune description renseignée.</p>')+
     '<p class="abn-count">'+count+' fiche'+(n.count>1?'s':'')+' associée'+(n.count>1?'s':'')+' · '+period+'</p>';
-  }else detail.textContent='Sélectionnez un cercle pour découvrir cette personne.';
+   detail.classList.add('is-open');detail.setAttribute('aria-hidden','false');detail.scrollTop=0;
+  }else{
+   detail.classList.remove('is-open');detail.setAttribute('aria-hidden','true');
+   detail.innerHTML='';
+  }
   graph.querySelectorAll('.abn-node').forEach(el=>{const hit=el.getAttribute('data-id')===selected;el.querySelector('circle')?.setAttribute('stroke',hit?'#a85651':'#fff');el.querySelector('circle')?.setAttribute('stroke-width',hit?'4':'2');});
  }
+ detail.addEventListener('click',ev=>{if(ev.target.closest('.abn-close'))showDetail(null);});
+ section.addEventListener('keydown',ev=>{if(ev.key==='Escape'&&selected)showDetail(null);});
 
  function build(){
   cancelAnimationFrame(raf);hideTip();
@@ -108,7 +143,7 @@ function init(){
   rendered=list;
   kpis.innerHTML='<div><strong>'+total.toLocaleString('fr-FR')+'</strong>personnes indexées</div><div><strong>'+list.length.toLocaleString('fr-FR')+'</strong>cercles affichés</div><div><strong>'+list.reduce((s,p)=>s+p.count,0).toLocaleString('fr-FR')+'</strong>associations fiche–personne affichées</div>';
   section.querySelector('#abnFoot').textContent=state.year==='all'?'Toutes dates · maximum '+state.max+' cercles':'Année '+state.year+' · maximum '+state.max+' cercles';
-  if(!list.length){graph.innerHTML='<div class="abn-msg">Aucune personne indexée pour cette sélection.</div>';showDetail(null);return;}
+  if(!list.length){graph.replaceChildren();graph.innerHTML='<div class="abn-msg">Aucune personne indexée pour cette sélection.</div>';graph.appendChild(detail);showDetail(null);return;}
   // Positions initiales déterministes, légèrement décalées : aucune relation entre périphériques.
   nodes=list.map((p,i)=>{const t=i*2.399963229728653,dist=95+Math.sqrt((i+.5)/list.length)*160;
    return {...p,r:nodeRadius(p.count,largest),x:CX+Math.cos(t)*dist,y:CY+Math.sin(t)*dist,vx:0,vy:0,color:COLORS[labelGroup(p.person)]};});
@@ -206,7 +241,7 @@ function init(){
   }
   for(let y=1968;y<=1980;y++)yearInput.insertAdjacentHTML('beforeend','<option value="'+y+'">'+y+'</option>');
   section.querySelector('#abnFoot').textContent=fr.length+' fiches · '+people.size+' notices personnes';
-  console.info('ArchiBarthes : constellation V4.9 chargée',{fiches:fr.length,personnes:people.size,associations:linked,pointeursSansNotice:unlinked});
+  console.info('ArchiBarthes : constellation V4.10 chargée',{fiches:fr.length,personnes:people.size,associations:linked,pointeursSansNotice:unlinked});
   build();
  }catch(err){graph.innerHTML='<div class="abn-msg">Constellation indisponible : '+esc(err.message)+'</div>';console.error('ArchiBarthes constellation',err);}}
  load();
