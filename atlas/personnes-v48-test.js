@@ -1,11 +1,11 @@
-/* ArchiBarthes — Module « Le monde des noms » — V4.11 : notices latérales et HTML sécurisé.
+/* ArchiBarthes — Module « Le monde des noms » — V4.12 : étiquettes adaptatives et exploration au survol.
    Module expérimental chargé par atlas/main-test.js.
    Lecture seule : Fiche 102 / Personnes 10 / pointeur 16 / catégorie 263 / description 3 / date 9.
 */
 (function(){
 'use strict';
 const ROOT='#archibarthes-atlas', API='/heurist/hserv/controller/record_search.php';
-const VISIBLE_LABELS=12; // Noms permanents : les 12 personnes les plus citées dans la sélection.
+// Toutes les étiquettes sont candidates ; seules les collisions sont masquées.
  const COLORS={amis:'#648ba7',etudiants:'#789c91',famille:'#a56c6b',autres:'#97aebc'};
 const CATEGORY={amis:['6967'],etudiants:['7237'],famille:['6966']};
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -94,8 +94,9 @@ function init(){
  @media(max-width:760px){#archibarthes-atlas #relations .abn-detail{width:min(90%,380px);padding:17px}}
  #archibarthes-atlas #relations .abn-tip{display:none;position:fixed;z-index:2147483000;pointer-events:none;background:#173d54;color:white;padding:9px 12px;border-radius:3px;box-shadow:0 3px 14px #092a3833;font:12px/1.5 Arial,sans-serif;max-width:290px}
  #archibarthes-atlas #relations .abn-msg{color:#58768a;font:14px/1.6 Arial,sans-serif;padding:25px}
- #archibarthes-atlas #relations .abn-label{font:13px Georgia,serif;fill:#23455c;paint-order:stroke;stroke:#f7fafb;stroke-width:4px;stroke-linejoin:round;pointer-events:none}
-  #archibarthes-atlas #relations .abn-node{cursor:grab;outline:none}
+ #archibarthes-atlas #relations .abn-label{font:11.5px Georgia,serif;fill:#23455c;paint-order:stroke;stroke:#f7fafb;stroke-width:3px;stroke-linejoin:round;pointer-events:none}
+  #archibarthes-atlas #relations .abn-leader{stroke:#7393a7;stroke-width:.8;opacity:.55;pointer-events:none}
+ #archibarthes-atlas #relations .abn-node{cursor:grab;outline:none}
  #archibarthes-atlas #relations .abn-node:focus circle{stroke:#a85651;stroke-width:4}
  @media(max-width:760px){#archibarthes-atlas #relations .abn-toolbar{justify-content:flex-start}#archibarthes-atlas #relations .abn-panel{padding:9px}#archibarthes-atlas #relations .abn-graph{min-height:220px}}
  @media(prefers-reduced-motion:reduce){#archibarthes-atlas #relations .abn-btn{transition:none}}
@@ -105,7 +106,7 @@ function init(){
  const detail=document.createElement('aside');detail.id='abnDetail';detail.className='abn-detail';detail.setAttribute('aria-hidden','true');graph.appendChild(detail);
  const tip=document.createElement('div');tip.className='abn-tip';section.appendChild(tip);
  let state={tab:'amis',year:'all',search:''},people=new Map(),indexed=[],categoryMap=new Map(),rendered=[],nodes=[],raf=0,stage=null,selected=null,drag=null,alpha=0;
- const W=920,H=590,CX=W/2,CY=H/2;
+ const W=1120,H=720,CX=W/2,CY=H/2;
  function descendants(){
   const tree=window.$Db?.trm_TreeData?.('5432','tree');
   if(!Array.isArray(tree)||!tree.length)throw Error('Vocabulaire « Person type » indisponible (5432).');
@@ -152,13 +153,13 @@ function init(){
   section.querySelector('#abnFoot').textContent=state.year==='all'?'Toutes dates · ensemble des présences':'Année '+state.year+' · ensemble des présences';
   if(!list.length){graph.replaceChildren();graph.innerHTML='<div class="abn-msg">Aucune personne indexée pour cette sélection.</div>';graph.appendChild(detail);showDetail(null);return;}
   // Positions initiales déterministes, légèrement décalées : aucune relation entre périphériques.
-  nodes=list.map((p,i)=>{const t=i*2.399963229728653,dist=95+Math.sqrt((i+.5)/list.length)*160;
+  nodes=list.map((p,i)=>{const t=i*2.399963229728653,dist=135+Math.sqrt((i+.5)/list.length)*205;
    return {...p,r:nodeRadius(p.count,largest),x:CX+Math.cos(t)*dist,y:CY+Math.sin(t)*dist,vx:0,vy:0,color:COLORS[labelGroup(p.person)]};});
   const lines=nodes.map(n=>'<line data-edge="'+esc(n.id)+'" x1="'+CX+'" y1="'+CY+'" x2="'+n.x+'" y2="'+n.y+'" stroke="#a8becb" stroke-width="1.2" opacity=".48"/>').join('');
   const circles=nodes.map(n=>'<g class="abn-node" tabindex="0" role="button" aria-label="'+esc(n.name)+', '+n.count+' fiches" data-id="'+esc(n.id)+'" transform="translate('+n.x+' '+n.y+')"><circle r="'+n.r.toFixed(2)+'" fill="'+n.color+'" stroke="#fff" stroke-width="2"/><title>'+esc(n.name)+' · '+n.count+' fiches</title></g>').join('');
-  const labelled=nodes.slice(0,VISIBLE_LABELS);
+  const labelled=nodes;
    const labels=labelled.map(n=>'<text class="abn-label" data-label="'+esc(n.id)+'" aria-hidden="true">'+esc(n.name)+'</text>').join('');
-   graph.innerHTML='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Constellation des personnes mentionnées dans le fichier, Roland Barthes au centre"><g class="abn-edges">'+lines+'</g><g class="abn-nodes">'+circles+'</g><g class="abn-labels" pointer-events="none">'+labels+'</g><g pointer-events="none"><circle cx="'+CX+'" cy="'+CY+'" r="49" fill="#173d55" stroke="white" stroke-width="4"/><text x="'+CX+'" y="'+(CY-5)+'" fill="white" font-family="Georgia,serif" font-size="21" text-anchor="middle">Roland</text><text x="'+CX+'" y="'+(CY+18)+'" fill="white" font-family="Georgia,serif" font-size="21" text-anchor="middle">Barthes</text></g></svg>';
+   graph.innerHTML='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Constellation des personnes mentionnées dans le fichier, Roland Barthes au centre"><g class="abn-edges">'+lines+'</g><g class="abn-nodes">'+circles+'</g><g class="abn-leaders" pointer-events="none"></g><g class="abn-labels" pointer-events="none">'+labels+'</g><g pointer-events="none"><circle cx="'+CX+'" cy="'+CY+'" r="49" fill="#173d55" stroke="white" stroke-width="4"/><text x="'+CX+'" y="'+(CY-5)+'" fill="white" font-family="Georgia,serif" font-size="21" text-anchor="middle">Roland</text><text x="'+CX+'" y="'+(CY+18)+'" fill="white" font-family="Georgia,serif" font-size="21" text-anchor="middle">Barthes</text></g></svg>';
   graph.appendChild(detail);
   stage=graph.querySelector('svg');
   const els=new Map([...graph.querySelectorAll('.abn-node')].map(el=>[el.dataset.id,el]));
@@ -166,44 +167,70 @@ function init(){
    const labelEls=new Map([...graph.querySelectorAll('[data-label]')].map(el=>[el.dataset.label,el]));
    // Priorité aux noms les plus présents ; éviter les collisions avec cercles et étiquettes.
    // Les étiquettes suivent les nœuds au cours de la simulation et du déplacement manuel.
+   const leaderLayer=stage.querySelector('.abn-leaders');
+   let labelsDirty=true,paintFrame=0,hovered=null;
+   const labelPositions=new Map();
+   // Placement déterministe : proximité prioritaire, puis décalages progressifs.
+   // Tous les noms sont candidats, sans plafond numérique.
    function paintLabels(){
-    const occupied=[];
-    // Les noms fréquents sont prioritaires ; on essaie les deux côtés du cercle
-    // et plusieurs hauteurs, en mesurant la largeur réelle de Georgia.
+    const occupied=[];labelPositions.clear();
+    const leaders=[];
     for(const n of labelled){
      const el=labelEls.get(n.id);if(!el)continue;
      el.style.display='';
-     const width=Math.min(W-16,Math.ceil(el.getComputedTextLength())+4);
-     const preferred=n.x>=CX?1:-1;
+     const width=Math.min(W-20,Math.ceil(el.getComputedTextLength())+3);
+     const height=16,preferred=n.x>=CX?1:-1;
      let chosen=null;
-     for(const side of [preferred,-preferred]){
-      for(const vertical of [0,-22,22,-44,44,-66,66,-88,88]){
-       const x=side>0?n.x+n.r+11:n.x-n.r-11-width;
-       const y=n.y+vertical-10;
-       const rect={x,y,w:width,h:20};
-       if(rect.x<8||rect.x+rect.w>W-8||rect.y<8||rect.y+rect.h>H-8)continue;
-       const overlaps=occupied.some(b=>rect.x<b.x+b.w+8&&rect.x+rect.w+8>b.x&&rect.y<b.y+b.h+6&&rect.y+rect.h+6>b.y);
-       const touches=nodes.some(other=>{
-        const nearX=Math.max(rect.x,Math.min(other.x,rect.x+rect.w));
-        const nearY=Math.max(rect.y,Math.min(other.y,rect.y+rect.h));
-        return Math.hypot(other.x-nearX,other.y-nearY)<other.r+5;
-       });
-       const centerX=Math.max(rect.x,Math.min(CX,rect.x+rect.w));
-       const centerY=Math.max(rect.y,Math.min(CY,rect.y+rect.h));
-       const centerHit=Math.hypot(CX-centerX,CY-centerY)<58;
-       if(!overlaps&&!touches&&!centerHit){chosen=rect;break;}
+     for(const offset of [0,-19,19,-38,38,-57,57,-76,76,-95,95,-114,114]){
+      for(const side of [preferred,-preferred]){
+       const x=side>0?n.x+n.r+8:n.x-n.r-8-width;
+       const y=n.y+offset-height/2;
+       const rect={x,y,w:width,h:height};
+       if(x<7||x+width>W-7||y<7||y+height>H-7)continue;
+       if(occupied.some(b=>x<b.x+b.w+5&&x+width+5>b.x&&y<b.y+b.h+4&&y+height+4>b.y))continue;
+       if(nodes.some(other=>{
+        const nx=Math.max(x,Math.min(other.x,x+width)),ny=Math.max(y,Math.min(other.y,y+height));
+        return Math.hypot(other.x-nx,other.y-ny)<other.r+3;
+       }))continue;
+       const nx=Math.max(x,Math.min(CX,x+width)),ny=Math.max(y,Math.min(CY,y+height));
+       if(Math.hypot(CX-nx,CY-ny)<58)continue;
+       chosen={...rect,side,offset};break;
       }
       if(chosen)break;
      }
-     if(chosen){el.setAttribute('x',chosen.x);el.setAttribute('y',chosen.y+15);occupied.push(chosen);}
-     else el.style.display='none';
+     if(chosen){
+      el.setAttribute('x',chosen.x);el.setAttribute('y',chosen.y+12);
+      el.style.display='';occupied.push(chosen);labelPositions.set(n.id,chosen);
+      if(Math.abs(chosen.offset)>12){
+       const endX=chosen.side>0?chosen.x-3:chosen.x+chosen.w+3;
+       const endY=chosen.y+chosen.h/2;
+       leaders.push('<line class="abn-leader" x1="'+(n.x+(chosen.side*n.r)).toFixed(1)+'" y1="'+n.y.toFixed(1)+'" x2="'+endX.toFixed(1)+'" y2="'+endY.toFixed(1)+'"/>');
+      }
+     }else el.style.display='none';
     }
+    leaderLayer.innerHTML=leaders.join('');
+    labelsDirty=false;
+   }
+   function highlight(n){
+    if(hovered===n?.id)return;
+    hovered=n?.id||null;
+    for(const item of nodes){
+     const active=!n||item.id===n.id;
+     els.get(item.id)?.setAttribute('opacity',active?'1':'.23');
+     edges.get(item.id)?.setAttribute('opacity',active?(n?'.95':'.48'):'.09');
+     const label=labelEls.get(item.id);
+     if(label){label.setAttribute('opacity',active?'1':'.22');}
+    }
+    if(n){
+     const el=labelEls.get(n.id);
+     if(el){el.style.display='';el.setAttribute('x',Math.min(W-12,n.x+n.r+9));el.setAttribute('y',Math.max(16,n.y-9));el.setAttribute('opacity','1');}
+    }else labelsDirty=true;
    }
 
-   function paint(){for(const n of nodes){els.get(n.id)?.setAttribute('transform','translate('+n.x.toFixed(2)+' '+n.y.toFixed(2)+')');const edge=edges.get(n.id);if(edge){edge.setAttribute('x2',n.x.toFixed(2));edge.setAttribute('y2',n.y.toFixed(2));}}paintLabels();}
+   function paint(){for(const n of nodes){els.get(n.id)?.setAttribute('transform','translate('+n.x.toFixed(2)+' '+n.y.toFixed(2)+')');const edge=edges.get(n.id);if(edge){edge.setAttribute('x2',n.x.toFixed(2));edge.setAttribute('y2',n.y.toFixed(2));}}if(++paintFrame%12===0||labelsDirty)paintLabels();}
   function tick(){
    const stop=alpha<.012&&!drag;
-   if(stop){paint();return;}
+   if(stop){labelsDirty=true;paint();return;}
    for(const n of nodes){if(drag===n.id)continue;
     const dx=n.x-CX,dy=n.y-CY,d=Math.max(1,Math.hypot(dx,dy)),target=103+(n.r*1.5)+Math.sqrt(nodes.length)*8;
     n.vx+=(dx/d)*(target-d)*.0025*alpha;n.vy+=(dy/d)*(target-d)*.0025*alpha;
@@ -225,10 +252,10 @@ function init(){
    paint();alpha=0;
   }else raf=requestAnimationFrame(tick);
   function nodeAt(t){const el=t.closest?.('.abn-node');return el?nodes.find(n=>n.id===el.dataset.id):null;}
-  stage.addEventListener('pointermove',ev=>{if(drag){const r=stage.getBoundingClientRect(),n=nodes.find(n=>n.id===drag);if(!n)return;n.x=Math.max(n.r,Math.min(W-n.r,(ev.clientX-r.left)*W/r.width));n.y=Math.max(n.r,Math.min(H-n.r,(ev.clientY-r.top)*H/r.height));n.vx=n.vy=0;alpha=Math.max(alpha,.15);paint();hideTip();return;}const n=nodeAt(ev.target);if(n)tooltip(ev,n);else hideTip();});
-  stage.addEventListener('pointerleave',hideTip);
+  stage.addEventListener('pointermove',ev=>{if(drag){const r=stage.getBoundingClientRect(),n=nodes.find(n=>n.id===drag);if(!n)return;n.x=Math.max(n.r,Math.min(W-n.r,(ev.clientX-r.left)*W/r.width));n.y=Math.max(n.r,Math.min(H-n.r,(ev.clientY-r.top)*H/r.height));n.vx=n.vy=0;alpha=Math.max(alpha,.15);labelsDirty=true;paint();hideTip();return;}const n=nodeAt(ev.target);if(n){tooltip(ev,n);highlight(n);}else{hideTip();highlight(null);}});
+  stage.addEventListener('pointerleave',()=>{hideTip();highlight(null);});
   stage.addEventListener('pointerdown',ev=>{const n=nodeAt(ev.target);if(!n)return;drag=n.id;try{ev.target.closest('.abn-node').setPointerCapture(ev.pointerId);}catch(_){}hideTip();});
-  function endDrag(ev){if(!drag)return;const n=nodes.find(n=>n.id===drag);drag=null;if(n){alpha=.28;cancelAnimationFrame(raf);if(!reduced)raf=requestAnimationFrame(tick);showDetail(n);}}
+  function endDrag(ev){if(!drag)return;const n=nodes.find(n=>n.id===drag);drag=null;if(n){labelsDirty=true;alpha=.28;cancelAnimationFrame(raf);if(!reduced)raf=requestAnimationFrame(tick);showDetail(n);}}
   stage.addEventListener('pointerup',endDrag);stage.addEventListener('pointercancel',endDrag);
   stage.addEventListener('click',ev=>{const n=nodeAt(ev.target);if(n)showDetail(n);});
   stage.addEventListener('keydown',ev=>{if(ev.key==='Enter'||ev.key===' '){const n=nodeAt(ev.target);if(n){ev.preventDefault();showDetail(n);}}});
