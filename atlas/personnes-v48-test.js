@@ -1,4 +1,4 @@
-/* ArchiBarthes — Module « Le monde des noms » — V4.10 : notices latérales et HTML sécurisé.
+/* ArchiBarthes — Module « Le monde des noms » — V4.10.1 : notices latérales et HTML sécurisé.
    Module expérimental chargé par atlas/main-test.js.
    Lecture seule : Fiche 102 / Personnes 10 / pointeur 16 / catégorie 263 / description 3 / date 9.
 */
@@ -82,10 +82,16 @@ function init(){
  #archibarthes-atlas #relations .abn-filters input{flex:1;max-width:190px;min-width:115px}
  #archibarthes-atlas #relations .abn-kpis{display:flex;flex-wrap:wrap;gap:20px;margin:10px 0 15px;color:#547185;font:12px Arial,sans-serif}
  #archibarthes-atlas #relations .abn-kpis strong{display:block;color:#183e55;font:27px Georgia,serif;margin-bottom:5px}
- #archibarthes-atlas #relations .abn-detail{margin-top:14px;border-top:1px solid #e3ebef;padding-top:14px;min-height:50px;font:13px/1.6 Arial,sans-serif;color:#516f82}
- #archibarthes-atlas #relations .abn-detail .abn-description{margin:10px 0 12px;white-space:normal;color:#304f62;font:14px/1.65 Arial,sans-serif;max-width:850px}
-  #archibarthes-atlas #relations .abn-detail .abn-count{font:12px/1.6 Arial,sans-serif;color:#627d8d}
-  #archibarthes-atlas #relations .abn-detail strong{color:#1f4a64;font:20px Georgia,serif}
+ #archibarthes-atlas #relations .abn-detail{position:absolute;right:0;top:0;bottom:0;width:min(36%,410px);box-sizing:border-box;z-index:8;background:#fff;box-shadow:-8px 0 26px #173d5526;border-left:1px solid #dce7ec;padding:24px;overflow-y:auto;transform:translateX(105%);visibility:hidden;transition:transform .25s ease,visibility .25s;font:13px/1.6 Arial,sans-serif;color:#516f82}
+ #archibarthes-atlas #relations .abn-detail.is-open{transform:translateX(0);visibility:visible}
+ #archibarthes-atlas #relations .abn-detail-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:22px}
+ #archibarthes-atlas #relations .abn-detail-kicker{font:600 11px Arial,sans-serif;letter-spacing:.13em;text-transform:uppercase;color:#65849a}
+ #archibarthes-atlas #relations .abn-close{border:1px solid #dce7ec;background:#fff;color:#234f6b;font:22px Arial,sans-serif;cursor:pointer;width:32px;height:32px}
+ #archibarthes-atlas #relations .abn-detail .abn-name{display:block;color:#1f4a64;font:24px Georgia,serif}
+ #archibarthes-atlas #relations .abn-detail .abn-description{margin:18px 0;white-space:normal;color:#304f62;font:14px/1.65 Arial,sans-serif;overflow-wrap:anywhere}
+ #archibarthes-atlas #relations .abn-description p{margin:0 0 12px}
+ #archibarthes-atlas #relations .abn-detail .abn-count{border-top:1px solid #e3ebef;padding-top:12px;font:12px/1.6 Arial,sans-serif;color:#627d8d}
+ @media(max-width:760px){#archibarthes-atlas #relations .abn-detail{width:min(90%,380px);padding:17px}}
  #archibarthes-atlas #relations .abn-tip{display:none;position:fixed;z-index:2147483000;pointer-events:none;background:#173d54;color:white;padding:9px 12px;border-radius:3px;box-shadow:0 3px 14px #092a3833;font:12px/1.5 Arial,sans-serif;max-width:290px}
  #archibarthes-atlas #relations .abn-msg{color:#58768a;font:14px/1.6 Arial,sans-serif;padding:25px}
  #archibarthes-atlas #relations .abn-label{font:13px Georgia,serif;fill:#23455c;paint-order:stroke;stroke:#f7fafb;stroke-width:4px;stroke-linejoin:round;pointer-events:none}
@@ -96,6 +102,7 @@ function init(){
  `;document.head.appendChild(style);
  section.innerHTML=`<div class="wrap"><div class="section-head"><div><div class="eyebrow">06 / Personnes et présences</div><h2>Le monde des noms</h2></div><div class="abn-toolbar"><div class="abn-tabs" role="group" aria-label="Constellations de personnes"><button class="abn-btn" data-abn-tab="amis" aria-pressed="true">Amis</button><button class="abn-btn" data-abn-tab="intimes">Famille et proches</button><button class="abn-btn" data-abn-tab="auteurs">Écrivains et penseurs</button><button class="abn-btn" data-abn-tab="tous">Tous les noms</button></div></div></div><p class="intro">Autour de Roland Barthes, les personnes mentionnées dans le Grand Fichier. Chaque cercle représente une notice de personne ; sa <strong>surface</strong> traduit le nombre de fiches distinctes où elle apparaît. Les traits indiquent seulement cette présence documentaire.</p><div class="abn-panel"><div class="abn-filters"><label for="abnYear">Période</label><select id="abnYear"><option value="all">1968–1980</option></select><label for="abnLimit">Afficher</label><select id="abnLimit"><option value="40">40 noms</option><option value="75" selected>75 noms</option><option value="120">120 noms</option><option value="9999">Tous les noms</option></select><label for="abnSearch">Rechercher</label><input id="abnSearch" type="search" placeholder="Nom de personne" autocomplete="off"></div><div id="abnKpis" class="abn-kpis" aria-live="polite"></div><div id="abnGraph" class="abn-graph"><div class="abn-msg">Chargement des notices et des fiches Heurist…</div></div><div class="abn-foot"><span>Déplacer les cercles à la souris · Survoler ou sélectionner un nom</span><span id="abnFoot">Données Heurist</span></div></div><p class="note">Les catégories de personnes peuvent se recouper. Une même personne n'est comptée qu'une fois par fiche. Un lien vers Barthes ne préjuge ni d'une amitié ni d'une relation personnelle. Les fiches sans date annuelle univoque sont comprises dans le total général, mais pas dans les vues annuelles.</p></div>`;
  const graph=section.querySelector('#abnGraph'), kpis=section.querySelector('#abnKpis'),yearInput=section.querySelector('#abnYear'),limitInput=section.querySelector('#abnLimit'),searchInput=section.querySelector('#abnSearch');
+ const detail=document.createElement('aside');detail.id='abnDetail';detail.className='abn-detail';detail.setAttribute('aria-hidden','true');graph.appendChild(detail);
  const tip=document.createElement('div');tip.className='abn-tip';section.appendChild(tip);
  let state={tab:'amis',year:'all',max:75,search:''},people=new Map(),indexed=[],categoryMap=new Map(),rendered=[],nodes=[],raf=0,stage=null,selected=null,drag=null,alpha=0;
  const W=920,H=590,CX=W/2,CY=H/2;
@@ -152,6 +159,7 @@ function init(){
   const labelled=nodes.slice(0,VISIBLE_LABELS);
    const labels=labelled.map(n=>'<text class="abn-label" data-label="'+esc(n.id)+'" aria-hidden="true">'+esc(n.name)+'</text>').join('');
    graph.innerHTML='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Constellation des personnes mentionnées dans le fichier, Roland Barthes au centre"><g class="abn-edges">'+lines+'</g><g class="abn-nodes">'+circles+'</g><g class="abn-labels" pointer-events="none">'+labels+'</g><g pointer-events="none"><circle cx="'+CX+'" cy="'+CY+'" r="49" fill="#173d55" stroke="white" stroke-width="4"/><text x="'+CX+'" y="'+(CY-5)+'" fill="white" font-family="Georgia,serif" font-size="21" text-anchor="middle">Roland</text><text x="'+CX+'" y="'+(CY+18)+'" fill="white" font-family="Georgia,serif" font-size="21" text-anchor="middle">Barthes</text></g></svg>';
+  graph.appendChild(detail);
   stage=graph.querySelector('svg');
   const els=new Map([...graph.querySelectorAll('.abn-node')].map(el=>[el.dataset.id,el]));
   const edges=new Map([...graph.querySelectorAll('[data-edge]')].map(el=>[el.dataset.edge,el]));
