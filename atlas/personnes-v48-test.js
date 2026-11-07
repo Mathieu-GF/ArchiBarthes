@@ -1,6 +1,6 @@
-/* ArchiBarthes — Module « Le monde des noms » — V4.8 : noms visibles.
-   Chargé depuis atlas/main.js sur GitHub Pages.
-   Lecture seule : Fiche 102 / Personnes 10 / pointeur 16 / catégorie 263 / date 9.
+/* ArchiBarthes — Module « Le monde des noms » — V4.9 : noms visibles.
+   Module expérimental chargé par atlas/main-test.js.
+   Lecture seule : Fiche 102 / Personnes 10 / pointeur 16 / catégorie 263 / description 3 / date 9.
 */
 (function(){
 'use strict';
@@ -30,6 +30,11 @@ async function fetchType(type,fields){
 }
 function init(){
  const root=document.querySelector(ROOT),section=root?.querySelector('#relations');
+ // Ancienne démonstration thématique « Constellations » (section #themes).
+ // Retrait limité au module expérimental : aucun changement dans core.js.
+ const oldConstellation=root?.querySelector('#themes');
+ if(oldConstellation){oldConstellation.hidden=true;oldConstellation.style.setProperty('display','none','important');}
+ root?.querySelectorAll('a[href="#themes"]').forEach(a=>a.hidden=true);
  if(!section||root.dataset.namesV47)return;
  root.dataset.namesV47='1';
  // Un seul module remplace l'ancien espace de démonstration « Réseau relationnel ».
@@ -50,7 +55,9 @@ function init(){
  #archibarthes-atlas #relations .abn-kpis{display:flex;flex-wrap:wrap;gap:20px;margin:10px 0 15px;color:#547185;font:12px Arial,sans-serif}
  #archibarthes-atlas #relations .abn-kpis strong{display:block;color:#183e55;font:27px Georgia,serif;margin-bottom:5px}
  #archibarthes-atlas #relations .abn-detail{margin-top:14px;border-top:1px solid #e3ebef;padding-top:14px;min-height:50px;font:13px/1.6 Arial,sans-serif;color:#516f82}
- #archibarthes-atlas #relations .abn-detail strong{color:#1f4a64;font:20px Georgia,serif}
+ #archibarthes-atlas #relations .abn-detail .abn-description{margin:10px 0 12px;white-space:pre-line;color:#304f62;font:14px/1.65 Arial,sans-serif;max-width:850px}
+  #archibarthes-atlas #relations .abn-detail .abn-count{font:12px/1.6 Arial,sans-serif;color:#627d8d}
+  #archibarthes-atlas #relations .abn-detail strong{color:#1f4a64;font:20px Georgia,serif}
  #archibarthes-atlas #relations .abn-tip{display:none;position:fixed;z-index:2147483000;pointer-events:none;background:#173d54;color:white;padding:9px 12px;border-radius:3px;box-shadow:0 3px 14px #092a3833;font:12px/1.5 Arial,sans-serif;max-width:290px}
  #archibarthes-atlas #relations .abn-msg{color:#58768a;font:14px/1.6 Arial,sans-serif;padding:25px}
  #archibarthes-atlas #relations .abn-label{font:13px Georgia,serif;fill:#23455c;paint-order:stroke;stroke:#f7fafb;stroke-width:4px;stroke-linejoin:round;pointer-events:none}
@@ -78,9 +85,19 @@ function init(){
  function tooltip(ev,n){tip.innerHTML='<strong>'+esc(n.name)+'</strong><br>'+n.count+' fiche'+(n.count>1?'s':'')+' · '+(state.year==='all'?'Toutes dates':state.year);tip.style.display='block';moveTip(ev);}
  function moveTip(ev){tip.style.left=Math.max(6,Math.min(ev.clientX+16,innerWidth-tip.offsetWidth-12))+'px';tip.style.top=Math.max(6,ev.clientY-tip.offsetHeight-12)+'px';}
  function hideTip(){tip.style.display='none';}
- function showDetail(n){selected=n?.id||null;detail.innerHTML=n?'<strong>'+esc(n.name)+'</strong><p>'+n.count+' fiche'+(n.count>1?'s':'')+' pour la période sélectionnée · '+n.person.all.size+' fiche(s) au total (toutes dates).</p><p>'+esc(categoryNames(n.person))+'</p><p>Notice Heurist n° '+esc(n.id)+'. Le cercle représente une fréquence de présence dans les fiches, non l’intensité d’une relation.</p>':'Sélectionnez un cercle pour connaître sa présence dans le fichier.';
+ function showDetail(n){
+  selected=n?.id||null;
+  if(n){
+   const description=n.person.description.trim();
+   const count=n.count.toLocaleString('fr-FR');
+   const period=state.year==='all'?'toutes dates':'en '+state.year;
+   detail.innerHTML='<strong>'+esc(n.name)+'</strong>'+
+    (description?'<p class="abn-description">'+esc(description)+'</p>':'<p class="abn-description">Aucune description renseignée.</p>')+
+    '<p class="abn-count">'+count+' fiche'+(n.count>1?'s':'')+' associée'+(n.count>1?'s':'')+' · '+period+'</p>';
+  }else detail.textContent='Sélectionnez un cercle pour découvrir cette personne.';
   graph.querySelectorAll('.abn-node').forEach(el=>{const hit=el.getAttribute('data-id')===selected;el.querySelector('circle')?.setAttribute('stroke',hit?'#a85651':'#fff');el.querySelector('circle')?.setAttribute('stroke-width',hit?'4':'2');});
  }
+
  function build(){
   cancelAnimationFrame(raf);hideTip();
   let list=[...people.values()].filter(p=>belongs(p,state.tab)).map(p=>({id:p.id,name:p.name,person:p,count:countFor(p,state.year)})).filter(p=>p.count>0).sort((a,b)=>b.count-a.count||a.name.localeCompare(b.name,'fr'));
@@ -108,24 +125,38 @@ function init(){
    // Les étiquettes suivent les nœuds au cours de la simulation et du déplacement manuel.
    function paintLabels(){
     const occupied=[];
+    // Les noms fréquents sont prioritaires ; on essaie les deux côtés du cercle
+    // et plusieurs hauteurs, en mesurant la largeur réelle de Georgia.
     for(const n of labelled){
      const el=labelEls.get(n.id);if(!el)continue;
-     const width=Math.min(240,Math.max(38,n.name.length*6.7));
-     const side=n.x>=CX?1:-1;
+     el.style.display='';
+     const width=Math.min(W-16,Math.ceil(el.getComputedTextLength())+4);
+     const preferred=n.x>=CX?1:-1;
      let chosen=null;
-     for(const vertical of [0,-18,18,-36,36,-54,54]){
-      const x=side>0?n.x+n.r+9:n.x-n.r-9-width;
-      const y=n.y+vertical-9;
-      const rect={x:Math.max(5,Math.min(W-width-5,x)),y:Math.max(5,Math.min(H-19,y)),w:width,h:18};
-      const overlap=occupied.some(b=>rect.x<b.x+b.w+5&&rect.x+rect.w+5>b.x&&rect.y<b.y+b.h+3&&rect.y+rect.h+3>b.y);
-      const circlesHit=nodes.some(other=>other.id!==n.id&&other.x>rect.x-10&&other.x<rect.x+rect.w+10&&other.y>rect.y-10&&other.y<rect.y+rect.h+10&&Math.hypot(other.x-Math.max(rect.x,Math.min(other.x,rect.x+rect.w)),other.y-Math.max(rect.y,Math.min(other.y,rect.y+rect.h)))<other.r+3);
-      const centerHit= Math.hypot(CX-Math.max(rect.x,Math.min(CX,rect.x+rect.w)),CY-Math.max(rect.y,Math.min(CY,rect.y+rect.h)))<53;
-      if(!overlap&&!circlesHit&&!centerHit){chosen=rect;break;}
+     for(const side of [preferred,-preferred]){
+      for(const vertical of [0,-22,22,-44,44,-66,66,-88,88]){
+       const x=side>0?n.x+n.r+11:n.x-n.r-11-width;
+       const y=n.y+vertical-10;
+       const rect={x,y,w:width,h:20};
+       if(rect.x<8||rect.x+rect.w>W-8||rect.y<8||rect.y+rect.h>H-8)continue;
+       const overlaps=occupied.some(b=>rect.x<b.x+b.w+8&&rect.x+rect.w+8>b.x&&rect.y<b.y+b.h+6&&rect.y+rect.h+6>b.y);
+       const touches=nodes.some(other=>{
+        const nearX=Math.max(rect.x,Math.min(other.x,rect.x+rect.w));
+        const nearY=Math.max(rect.y,Math.min(other.y,rect.y+rect.h));
+        return Math.hypot(other.x-nearX,other.y-nearY)<other.r+5;
+       });
+       const centerX=Math.max(rect.x,Math.min(CX,rect.x+rect.w));
+       const centerY=Math.max(rect.y,Math.min(CY,rect.y+rect.h));
+       const centerHit=Math.hypot(CX-centerX,CY-centerY)<58;
+       if(!overlaps&&!touches&&!centerHit){chosen=rect;break;}
+      }
+      if(chosen)break;
      }
-     if(chosen){el.setAttribute('x',chosen.x);el.setAttribute('y',chosen.y+14);el.style.display='';occupied.push(chosen);}
+     if(chosen){el.setAttribute('x',chosen.x);el.setAttribute('y',chosen.y+15);occupied.push(chosen);}
      else el.style.display='none';
     }
    }
+
    function paint(){for(const n of nodes){els.get(n.id)?.setAttribute('transform','translate('+n.x.toFixed(2)+' '+n.y.toFixed(2)+')');const edge=edges.get(n.id);if(edge){edge.setAttribute('x2',n.x.toFixed(2));edge.setAttribute('y2',n.y.toFixed(2));}}paintLabels();}
   function tick(){
    const stop=alpha<.012&&!drag;
@@ -167,15 +198,15 @@ function init(){
  window.addEventListener('scroll',hideTip,{passive:true});
  async function load(){try{
   descendants();
-  const [pr,fr]=await Promise.all([fetchType(10,['263']),fetchType(102,['9','16'])]);
-  people=new Map(pr.map(r=>{const id=String(r['1']),name=String(r['2']||'Personne '+id),cats=[...new Set(get(r,'263').map(String))];return[id,{id,name,cats,all:new Set(),years:new Map()}];}));
+  const [pr,fr]=await Promise.all([fetchType(10,['263','3']),fetchType(102,['9','16'])]);
+  people=new Map(pr.map(r=>{const id=String(r['1']),name=String(r['2']||'Personne '+id),cats=[...new Set(get(r,'263').map(String))];return[id,{id,name,cats,description:get(r,'3').map(String).filter(Boolean).join('\n'),all:new Set(),years:new Map()}];}));
   let unlinked=0,linked=0;
   for(const f of fr){const fiche=String(f['1']),year=parseYear(get(f,'9'));
    for(const id of new Set(get(f,'16').map(String))){const p=people.get(id);if(!p){unlinked++;continue;}linked++;p.all.add(fiche);if(year!=null&&year>=1968&&year<=1980){if(!p.years.has(year))p.years.set(year,new Set());p.years.get(year).add(fiche);}}
   }
   for(let y=1968;y<=1980;y++)yearInput.insertAdjacentHTML('beforeend','<option value="'+y+'">'+y+'</option>');
   section.querySelector('#abnFoot').textContent=fr.length+' fiches · '+people.size+' notices personnes';
-  console.info('ArchiBarthes : constellation V4.8 chargée',{fiches:fr.length,personnes:people.size,associations:linked,pointeursSansNotice:unlinked});
+  console.info('ArchiBarthes : constellation V4.9 chargée',{fiches:fr.length,personnes:people.size,associations:linked,pointeursSansNotice:unlinked});
   build();
  }catch(err){graph.innerHTML='<div class="abn-msg">Constellation indisponible : '+esc(err.message)+'</div>';console.error('ArchiBarthes constellation',err);}}
  load();
