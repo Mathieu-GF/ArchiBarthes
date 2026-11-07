@@ -20,7 +20,7 @@
   async function start() {
     try {
       await load('atlas/core.js');
-      await load('atlas/personnes-v48-test.js?v=4101');
+      await load('atlas/personnes-v48-test.js?v=' + Date.now());
       console.info('ArchiBarthes : Atlas de test chargé');
     } catch (error) {
       console.error('ArchiBarthes : erreur', error);
