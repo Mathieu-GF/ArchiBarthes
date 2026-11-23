@@ -601,16 +601,46 @@
     Crédit de l'image : à compléter selon la source et les droits retenus.
   -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrY0t3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcKIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-  <script>
-    document.querySelectorAll('.ab-nav details').forEach((menu) => {
-      menu.addEventListener('toggle', () => {
-        if (!menu.open) return;
+ 
+<script>
+(function () {
+  const menus = document.querySelectorAll('.ab-nav details');
 
-        document.querySelectorAll('.ab-nav details[open]').forEach((other) => {
-          if (other !== menu) other.removeAttribute('open');
-        });
-      });
+  function fermerMenus(sauf = null) {
+    menus.forEach(menu => {
+      if (menu !== sauf) menu.open = false;
     });
-  </script>
+  }
+
+  // Un seul sous-menu ouvert à la fois.
+  menus.forEach(menu => {
+    const summary = menu.querySelector('summary');
+
+    summary.addEventListener('click', event => {
+      event.preventDefault();
+
+      const etaitOuvert = menu.open;
+      fermerMenus();
+
+      menu.open = !etaitOuvert;
+    });
+  });
+
+  // Fermer en cliquant ailleurs.
+  document.addEventListener('click', event => {
+    if (!event.target.closest('.ab-nav details')) {
+      fermerMenus();
+    }
+  });
+
+  // Fermer avec Échap.
+  document.addEventListener('keydown', event => {
+    if (event.key === 'Escape') {
+      fermerMenus();
+    }
+  });
+})();
+</script>
+
 </body>
 </html>
