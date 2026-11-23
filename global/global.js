@@ -297,7 +297,7 @@ function gererHeaderAccueil() {
       header.dataset.abDisplayInitial = header.style.display;
       header.dataset.abAccueilMasque = "1";
     }
-    header.style.display = "none";
+    //header.style.display = "none";
   } else if (header.dataset.abAccueilMasque === "1") {
     header.style.display = header.dataset.abDisplayInitial || "";
     delete header.dataset.abAccueilMasque;
