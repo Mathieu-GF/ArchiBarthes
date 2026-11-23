@@ -23,7 +23,7 @@
   const params = new URLSearchParams(window.location.search);
   if (params.get('section') !== 'relations') return;
 
-  const cible = document.getElementById('relations');
+  const cible = document.querySelector('#relations .abn-panel');
   if (!cible) return;
 
   let dernierePosition = null;
