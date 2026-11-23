@@ -670,7 +670,7 @@
     url.searchParams.set("mode", "html");
 
     // Quitter l'iframe d'accueil et afficher la visionneuse.
-    window.open(url.href, "_blank", "noopener");
+   window.top.location.assign(url.href);
   });
 })();
 </script>
