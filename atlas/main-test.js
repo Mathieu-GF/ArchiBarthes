@@ -20,27 +20,39 @@
 
   // Accès direct à une section depuis l'accueil
   function naviguerVersSection() {
-    const params = new URLSearchParams(window.location.search);
-    const section = params.get('section');
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('section') !== 'relations') return;
 
-    if (section !== 'relations') return;
+  const cible = document.getElementById('relations');
+  if (!cible) return;
 
-    const cible = document.getElementById('relations');
-    if (!cible) {
-      console.warn('ArchiBarthes : section relations introuvable');
+  let dernierePosition = null;
+  let stable = 0;
+  let essais = 0;
+
+  function attendreStabilisation() {
+    const position = Math.round(
+      cible.getBoundingClientRect().top + window.scrollY
+    );
+
+    stable = position === dernierePosition ? stable + 1 : 0;
+    dernierePosition = position;
+    essais++;
+
+    if (stable >= 5 || essais >= 100) {
+      cible.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+      });
+      console.info('ArchiBarthes : navigation vers relations');
       return;
     }
 
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        cible.scrollIntoView({
-          behavior: 'smooth',
-          block: 'start'
-        });
-        console.info('ArchiBarthes : navigation vers relations');
-      });
-    });
+    setTimeout(attendreStabilisation, 100);
   }
+
+  attendreStabilisation();
+}
 
   async function start() {
     try {
