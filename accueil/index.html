@@ -506,6 +506,12 @@
       .ab-polaroid { height: 78% !important; left: 8% !important; padding: 11px 11px 40px !important; top: 8% !important; width: 84% !important; }
       .ab-portrait-credit { left: .15rem !important; }
     }
+    
+/* Masquer les sous-menus lorsque leur volet est fermé */
+.ab-nav details:not([open]) > .ab-dropdown {
+  display: none !important;
+}
+
   </style>
 </head>
 <body>
