@@ -423,13 +423,13 @@
       box-shadow: none !important;
       display: flex !important;
       flex-direction: column !important;
-      height: 76% !important;
-      left: 10% !important;
-      padding: 16px 16px 56px !important;
+      height: auto !important;
+      left: 6% !important;
+      padding: 23px 23px 72px !important;
       position: absolute !important;
-      top: 10% !important;
-      transform: rotate(-1.3deg) !important;
-      width: 78% !important;
+      top: 48% !important;
+      transform: translateY(-50%) rotate(-4deg) !important;
+      width: 88% !important;
       z-index: 2 !important;
     }
     .ab-polaroid img {
@@ -446,87 +446,47 @@
       transform: none !important;
       width: 100% !important;
     }
-    .ab-contact-sheet {
-      display: grid;
-      flex: 1 1 auto;
-      gap: 12px;
-      grid-template-rows: repeat(2, minmax(0, 1fr));
+    /* La photo détermine la hauteur de l'image : aucun recadrage.
+       La peinture garde exactement le même rectangle et les quatre côtés visibles. */
+    .ab-polaroid .ab-photo-surface {
+      flex: 0 0 auto !important;
       min-height: 0;
+      overflow: hidden;
       position: relative;
       width: 100%;
+      background: #111;
     }
-    .ab-contact-print {
-      background: #171717;
-      border: 7px solid #171717;
-      min-height: 0;
-      overflow: visible;
-      padding: 3px;
-      position: relative;
+    .ab-polaroid .ab-photo-surface .ab-photo-original {
+      background: transparent !important;
+      border: 0 !important;
+      display: block !important;
+      height: auto !important;
+      left: auto !important;
+      object-fit: contain !important;
+      position: relative !important;
+      top: auto !important;
+      transform: none !important;
+      width: 100% !important;
+      z-index: 1 !important;
     }
-    .ab-contact-print::before,
-    .ab-contact-print::after {
-      background: radial-gradient(circle, #faf9f6 0 1.5px, transparent 1.7px) center / 6px 12px repeat-y;
-      content: '';
-      height: calc(100% - 6px);
-      position: absolute;
-      top: 3px;
-      width: 6px;
-      z-index: 4;
-    }
-    .ab-contact-print::before { left: -7px; }
-    .ab-contact-print::after { right: -7px; }
-    .ab-photo-surface {
-      height: 100%;
-      position: relative;
-      width: 100%;
-    }
-    .ab-photo-surface img {
+    .ab-polaroid .ab-photo-surface .ab-paint-overlay {
+      background: transparent !important;
+      border: 0 !important;
       display: block !important;
       height: 100% !important;
-      object-fit: cover !important;
-      object-position: 48% 29% !important;
+      left: 0 !important;
+      object-fit: fill !important;
+      object-position: center center !important;
+      pointer-events: none;
+      position: absolute !important;
+      top: 0 !important;
+      transform: none !important;
       width: 100% !important;
-    }
-    .ab-contact-print.top .ab-photo-surface {
-      outline: 12px solid #ffd400;
-      outline-offset: 2px;
-    }
-    .ab-contact-print.top .ab-photo-surface::before {
-      border: 2px solid #ffd400;
-      border-radius: 1px 3px 0 2px;
-      content: '';
-      inset: -5px;
-      pointer-events: none;
-      position: absolute;
-      transform: rotate(.12deg);
-      z-index: 3;
-    }
-    .ab-red-bar {
-      height: calc(100% + 18px);
-      left: -9px;
-      overflow: visible;
-      pointer-events: none;
-      position: absolute;
-      top: -9px;
-      transform: rotate(-1.3deg) scale(1.02);
-      width: calc(100% + 18px);
-      z-index: 5;
-    }
-    .ab-red-bar path {
-      fill: none;
-      stroke: #e21b23;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-      stroke-width: 9.5;
-    }
-    .ab-red-bar .ab-red-bar-secondary {
-      opacity: .55;
-      stroke-width: 2.7;
-      transform: translate(1.5px, 1.8px);
+      z-index: 2 !important;
     }
     .ab-portrait-credit { color: #111 !important; left: -.8rem !important; z-index: 20 !important; }
     @media (max-width: 600px) {
-      .ab-polaroid { height: 78% !important; left: 8% !important; padding: 11px 11px 40px !important; top: 8% !important; width: 84% !important; }
+      .ab-polaroid { height: auto !important; left: 4% !important; padding: 15px 15px 50px !important; top: 50% !important; transform: translateY(-50%) rotate(-4deg) !important; width: 92% !important; }
       .ab-portrait-credit { left: .15rem !important; }
     }
     
@@ -535,44 +495,189 @@
   display: none !important;
 }
 
+
+/* ACCUEIL MOBILE : composition verticale, sans chevauchement. */
+@media (max-width: 600px) {
+  .ab-screen { overflow: hidden !important; }
+  .ab-hero {
+    display: flex !important;
+    flex-direction: column !important;
+    min-height: 0 !important;
+    width: 100%;
+    padding: 22px 0 0 !important;
+  }
+  .ab-portrait {
+    order: 1;
+    align-self: stretch;
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+    width: 100% !important;
+    padding: 10px 0 12px;
+  }
+  .ab-portrait::before, .ab-portrait::after { display: none !important; }
+  .ab-polaroid {
+    position: relative !important;
+    left: auto !important;
+    top: auto !important;
+    margin: 0 auto !important;
+    width: 82% !important;
+    height: auto !important;
+    padding: 12px 12px 35px !important;
+    transform: rotate(-4deg) !important;
+  }
+  .ab-hero-copy {
+    order: 2;
+    align-self: stretch !important;
+    position: relative !important;
+    inset: auto !important;
+    width: auto !important;
+    max-width: none !important;
+    margin: 12px 0 0 !important;
+    padding: 10px 24px 28px !important;
+    text-align: left;
+  }
+  .ab-site-title {
+    font-size: clamp(3rem, 12.1vw, 4.3rem) !important;
+    line-height: .95 !important;
+    letter-spacing: -.055em !important;
+    white-space: nowrap !important;
+  }
+  .ab-site-subtitle {
+    font-size: clamp(1.25rem, 5vw, 1.75rem) !important;
+    line-height: 1.12 !important;
+    margin-top: 12px !important;
+    max-width: 350px;
+  }
+  .ab-nav-wrap {
+    order: 3;
+    position: relative !important;
+    bottom: auto !important;
+    left: auto !important;
+    right: auto !important;
+    width: 100%;
+    margin-top: 0;
+    padding: 7px 0 9px !important;
+  }
+  .ab-portrait-credit { display: none !important; }
+}
+
+
+/* Menu mobile autonome : indépendant du JavaScript Bootstrap. */
+@media (max-width: 600px) {
+  .ab-nav-wrap .navbar-toggler {
+    display: block !important;
+    cursor: pointer;
+    min-height: 43px;
+    min-width: 49px;
+  }
+  .ab-nav-wrap #ab-mobile-menu { display: none !important; }
+  .ab-nav-wrap #ab-mobile-menu.show { display: block !important; }
+  .ab-nav-wrap .ab-nav {
+    padding: 8px 16px 12px;
+  }
+  .ab-nav-wrap .ab-nav > a,
+  .ab-nav-wrap .ab-nav details { font-size: 1.1rem; padding: .72rem .75rem; }
+}
+@media (min-width: 601px) {
+  .ab-nav-wrap .navbar-toggler { display: none !important; }
+  .ab-nav-wrap #ab-mobile-menu { display: block !important; }
+}
+
+
+/* Finitions mobiles — uniquement sur les écrans étroits.
+   Le desktop et le mécanisme autonome du menu sont inchangés. */
+@media (max-width: 600px) {
+  /* Rapprocher le titre du tirage sans nuire à la rotation. */
+  .ab-portrait { padding-bottom: 6px !important; }
+  .ab-hero-copy {
+    margin-top: 3px !important;
+    padding: 7px 25px 23px !important;
+  }
+  .ab-site-subtitle { margin-top: 10px !important; }
+
+  /* Hamburger minimaliste : trois traits ocre, sans double cadre. */
+  .ab-nav-wrap .navbar-toggler {
+    appearance: none;
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    color: var(--ab-olive) !important;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    min-width: 48px;
+    margin: 0 auto !important;
+    padding: 10px !important;
+    outline-offset: 3px;
+  }
+  .ab-nav-wrap .navbar-toggler:focus { box-shadow: none !important; }
+  .ab-nav-wrap .navbar-toggler:focus-visible {
+    outline: 2px solid var(--ab-blue) !important;
+  }
+  .ab-nav-wrap .navbar-toggler-icon,
+  .ab-nav-wrap .navbar-toggler-icon::before,
+  .ab-nav-wrap .navbar-toggler-icon::after {
+    border-top-color: var(--ab-olive) !important;
+    border-top-width: 2px !important;
+  }
+  .ab-nav-wrap .navbar-toggler-icon {
+    width: 25px !important;
+    height: 17px !important;
+    background: none !important;
+  }
+  .ab-nav-wrap .navbar-toggler-icon::before,
+  .ab-nav-wrap .navbar-toggler-icon::after { width: 25px !important; }
+  .ab-nav-wrap .navbar-toggler-icon::before { top: 5px !important; }
+  .ab-nav-wrap .navbar-toggler-icon::after { top: 11px !important; }
+
+  /* Liste plus éditoriale, plus compacte, sans toucher aux sous-menus. */
+  .ab-nav-wrap { padding: 6px 0 !important; }
+  .ab-nav-wrap .navbar-collapse {
+    border-top: 1px solid rgba(0,107,154,.18) !important;
+    margin-top: 5px !important;
+    padding: 3px 0 8px !important;
+  }
+  .ab-nav-wrap .ab-nav { padding: 5px 22px 8px !important; }
+  .ab-nav-wrap .ab-nav > a,
+  .ab-nav-wrap .ab-nav details {
+    font-size: 1.1rem !important;
+    font-weight: 500 !important;
+    letter-spacing: .035em !important;
+    padding: .61rem .55rem !important;
+  }
+  .ab-nav-wrap .ab-dropdown a { padding: .55rem .7rem !important; }
+}
+
   </style>
 </head>
 <body>
   <div class="ab-screen" id="accueil">
     <header class="ab-hero" aria-labelledby="ab-title">
       <div class="ab-portrait">
-        <!-- Portrait documentaire trouvé via une source éditoriale publique.
-             Vérifier les droits et le crédit avant mise en ligne définitive. -->
+        <!-- Polaroid incliné : un portrait noir et blanc et son calque rouge transparent. -->
         <div class="ab-polaroid">
-          <div class="ab-contact-sheet">
-            <div class="ab-contact-print top">
-              <div class="ab-photo-surface">
-                <img src="https://heurist.huma-num.fr/HEURIST/HEURIST_FILESTORE/GrandFichier_RB/file_uploads/ulf_288_roland-barthes-livres-litterature.jpg" alt="Premier tirage de contact du portrait de Roland Barthes">
-              </div>
-            </div>
-            <div class="ab-contact-print bottom">
-              <div class="ab-photo-surface">
-                <img src="https://heurist.huma-num.fr/HEURIST/HEURIST_FILESTORE/GrandFichier_RB/file_uploads/ulf_288_roland-barthes-livres-litterature.jpg" alt="Second tirage de contact du portrait de Roland Barthes">
-                <svg class="ab-red-bar" viewBox="0 0 100 100" aria-hidden="true" focusable="false">
-                  <path d="M-12 112 C20 84, 47 56, 112 -12" />
-                  <path class="ab-red-bar-secondary" d="M-10 114 C22 86, 49 58, 114 -10" />
-                  <path d="M-12 -12 C20 16, 50 48, 112 112" />
-                  <path class="ab-red-bar-secondary" d="M-10 -10 C22 18, 52 50, 114 114" />
-                </svg>
-              </div>
-            </div>
+          <div class="ab-photo-surface">
+            <img class="ab-photo-original"
+                 src="https://heurist.huma-num.fr/heurist/?db=GrandFichier_RB&amp;file=845482326d65f8e502df88d5e4068477219c4a06"
+                 alt="Portrait en noir et blanc de Roland Barthes">
+            <img class="ab-paint-overlay"
+                 src="https://heurist.huma-num.fr/heurist/?db=GrandFichier_RB&amp;file=3431f3a871306e6c4b50947e09a12973548bb0c2"
+                 alt="" aria-hidden="true">
           </div>
         </div>
       </div>
       <div class="ab-hero-copy">
         <h1 id="ab-title" class="ab-site-title">ArchiBarthes</h1>
-        <p class="ab-site-subtitle">édition numérique des fiches manuscrites de Roland Barthes</p>
-        <p class="ab-intro">Une base de données et un espace de recherche autour du fichier manuscrit.</p>
+        <p class="ab-site-subtitle">L'édition numérique des fiches manuscrites de Roland Barthes</p>
+        <p class="ab-intro">Une base de données et un espace de recherche autour d'une archive inédite.</p>
       </div>
 
-      <nav class="ab-nav-wrap navbar navbar-expand-sm" aria-label="Navigation principale">
+      <nav class="ab-nav-wrap navbar" aria-label="Navigation principale">
         <div class="container-fluid px-0">
-          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#ab-mobile-menu" aria-controls="ab-mobile-menu" aria-expanded="false" aria-label="Ouvrir le menu">
+          <button class="navbar-toggler" type="button" aria-controls="ab-mobile-menu" aria-expanded="false" aria-label="Ouvrir le menu">
             <span class="navbar-toggler-icon"></span>
           </button>
           <div class="collapse navbar-collapse" id="ab-mobile-menu">
@@ -631,7 +736,7 @@
     Intégration Heurist : le portrait est intégré directement dans ce fichier HTML pour faciliter l'aperçu et l'import dans Heurist.
     Crédit de l'image : à compléter selon la source et les droits retenus.
   -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrY0t3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcKIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0t3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcKIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
  
 <script>
 (function () {
@@ -700,6 +805,36 @@
 })();
 </script>
 
+
+<script>
+/* Menu mobile autonome, accessible au clic et au clavier. */
+(function () {
+  const bouton = document.querySelector('.ab-nav-wrap .navbar-toggler');
+  const menu = document.getElementById('ab-mobile-menu');
+  if (!bouton || !menu) return;
+
+  function basculer(ouvrir) {
+    menu.classList.toggle('show', ouvrir);
+    bouton.setAttribute('aria-expanded', String(ouvrir));
+    bouton.setAttribute('aria-label', ouvrir ? 'Fermer le menu' : 'Ouvrir le menu');
+  }
+  bouton.addEventListener('click', function () {
+    basculer(!menu.classList.contains('show'));
+  });
+  document.addEventListener('keydown', function (event) {
+    if (event.key === 'Escape' && menu.classList.contains('show')) {
+      basculer(false);
+      bouton.focus();
+    }
+  });
+  menu.addEventListener('click', function (event) {
+    if (event.target.closest('a') && window.innerWidth <= 600) basculer(false);
+  });
+  window.addEventListener('resize', function () {
+    if (window.innerWidth > 600) basculer(false);
+  });
+})();
+</script>
 
 </body>
 </html>
