@@ -249,33 +249,56 @@
     }
     .ab-nav .ab-dropdown a { color: var(--ab-blue-deep); font-size: .95rem; padding: .55rem .65rem; }
     .ab-nav .ab-dropdown a:hover { background: rgba(0,107,154,.1); color: var(--ab-olive); }
-    .ab-institutional-logos {
-      align-items: center;
-      background: transparent;
-      border-top: 1px solid rgba(0,107,154,.14);
-      display: flex;
-      gap: clamp(1rem, 4vw, 4.5rem);
-      justify-content: center;
-      margin: 0 auto;
-      max-width: 1100px;
-      opacity: 1;
-      padding: .7rem 1rem .8rem;
-    }
-    .ab-institutional-logos a { align-items: center; display: flex; height: 30px; }
-    .ab-institutional-logos img {
-      display: block;
-      filter: none;
-      height: auto;
-      max-height: 27px;
-      max-width: 145px;
-      object-fit: contain;
-      opacity: 1;
-      width: auto;
-    }
-    .ab-institutional-logos .ab-logo-heurist img { max-width: 112px; }
-    .ab-institutional-logos .ab-logo-bnf img { max-width: 145px; }
-    .ab-institutional-logos .ab-logo-cral img { max-width: 82px; }
-    .ab-institutional-logos .ab-logo-lamo img { max-width: 145px; }
+    /* Logos institutionnels — agrandis et responsive */
+.ab-institutional-logos {
+  align-items: center;
+  background: transparent;
+  border-top: 1px solid rgba(0,107,154,.14);
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: clamp(1rem, 3vw, 3rem);
+  row-gap: 1rem;
+  justify-content: center;
+  margin: 0 auto;
+  max-width: 1100px;
+  padding: .9rem 1rem 1rem;
+}
+
+.ab-institutional-logos a {
+  align-items: center;
+  display: flex;
+  height: 38px;
+}
+
+.ab-institutional-logos img {
+  display: block;
+  filter: none;
+  height: auto;
+  max-height: 33px;
+  max-width: 175px;
+  object-fit: contain;
+  opacity: 1;
+  width: auto;
+}
+
+.ab-institutional-logos .ab-logo-heurist img { max-width: 135px; }
+.ab-institutional-logos .ab-logo-bnf img { max-width: 175px; }
+.ab-institutional-logos .ab-logo-cral img { max-width: 100px; }
+.ab-institutional-logos .ab-logo-lamo img { max-width: 175px; }
+
+/* Adaptation smartphone */
+@media (max-width: 600px) {
+  .ab-institutional-logos {
+    padding: 1rem;
+    column-gap: 1.5rem;
+    row-gap: 1rem;
+  }
+
+  .ab-institutional-logos img {
+    max-height: 30px;
+    max-width: 125px;
+  }
+}
 
     /* Contenu secondaire : laisse la page directement exploitable comme accueil Heurist. */
     .ab-content {
