@@ -282,6 +282,29 @@ function placerReset() {
     });
   }
 
+/* Masquer le header Heurist uniquement sur l'accueil */
+
+function gererHeaderAccueil() {
+  const header = document.getElementById("main-header");
+  if (!header) return;
+
+  const estAccueil = !!document.querySelector(
+    'iframe[src*="/ArchiBarthes/accueil/"]'
+  );
+
+  if (estAccueil) {
+    if (header.dataset.abAccueilMasque !== "1") {
+      header.dataset.abDisplayInitial = header.style.display;
+      header.dataset.abAccueilMasque = "1";
+    }
+    header.style.display = "none";
+  } else if (header.dataset.abAccueilMasque === "1") {
+    header.style.display = header.dataset.abDisplayInitial || "";
+    delete header.dataset.abAccueilMasque;
+    delete header.dataset.abDisplayInitial;
+  }
+}
+
   function traduire() {
 
     // Document courant
@@ -295,7 +318,7 @@ function placerReset() {
         // Ignorer les iframes non accessibles
       }
     });
-
+gererHeaderAccueil();
   }
 
   traduire();
