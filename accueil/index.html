@@ -560,7 +560,7 @@
                 <span class="ab-dropdown">
                   <a href="#fiches">Recherche thématique</a>
                   <a href="#fiches">Mode visionneuse</a>
-                  <a href="#fiches">Lire une fiche au hasard</a>
+                  <a href="#" id="ab-fiche-hasard">Lire une fiche au hasard</a>
                 </span>
               </details>
               <details>
@@ -647,6 +647,34 @@
   });
 })();
 </script>
+  
+<script>
+(function () {
+  // Sélection éditoriale provisoire : quatre fiches.
+  const fiches = [1719, 1721, 1727, 1729];
+
+  const lien = document.getElementById("ab-fiche-hasard");
+  if (!lien) return;
+
+  lien.addEventListener("click", function (event) {
+    event.preventDefault();
+
+    const id = fiches[Math.floor(Math.random() * fiches.length)];
+
+    const url = new URL("https://heurist.huma-num.fr/heurist/");
+
+    url.searchParams.set("db", "GrandFichier_RB");
+    url.searchParams.set("w", "a");
+    url.searchParams.set("q", "ids:" + id);
+    url.searchParams.set("template", "template visionneuse 3 (correct serveur)");
+    url.searchParams.set("mode", "html");
+
+    // Quitter l'iframe d'accueil et afficher la visionneuse.
+    window.open(url.href, "_blank", "noopener");
+  });
+})();
+</script>
+
 
 </body>
 </html>
