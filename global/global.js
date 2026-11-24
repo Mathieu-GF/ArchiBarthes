@@ -282,24 +282,25 @@ function placerReset() {
     });
   }
 
-/* Masquer le header Heurist uniquement sur l'accueil */
+/* ARCHIBARTHES — Header natif :
+   masqué sur l'accueil, visible sur les pages intérieures */
 
 function gererHeaderAccueil() {
-  const header = document.getElementById("main-header");
-  if (!header) return;
 
-  const estAccueil = !!document.querySelector(
-    'iframe[src*="/ArchiBarthes/accueil/"]'
+  const params = new URLSearchParams(window.location.search);
+  const estPageInterieure = params.has("pageid");
+
+  // Le CSS global détermine la visibilité.
+  document.documentElement.classList.toggle(
+    "ab-page-interieure",
+    estPageInterieure
   );
 
-  if (estAccueil) {
-    if (header.dataset.abAccueilMasque !== "1") {
-      header.dataset.abDisplayInitial = header.style.display;
-      header.dataset.abAccueilMasque = "1";
-    }
-    header.style.display = "none";
-  } else if (header.dataset.abAccueilMasque === "1") {
-    header.style.display = header.dataset.abDisplayInitial || "";
+  // Neutraliser les anciens masquages JavaScript.
+  const header = document.getElementById("main-header");
+
+  if (header) {
+    header.style.removeProperty("display");
     delete header.dataset.abAccueilMasque;
     delete header.dataset.abDisplayInitial;
   }
