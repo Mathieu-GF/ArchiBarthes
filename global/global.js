@@ -288,9 +288,12 @@ function gererHeaderAccueil() {
   const header = document.getElementById("main-header");
   if (!header) return;
 
-  const estAccueil = !!document.querySelector(
-    'iframe[src*="/ArchiBarthes/accueil/"]'
-  );
+ const params = new URLSearchParams(window.location.search);
+
+const estAccueil =
+  params.get("db") === "GrandFichier_RB" &&
+  params.get("website") === "5268" &&
+  !params.has("pageid");
 
   if (estAccueil) {
     if (header.dataset.abAccueilMasque !== "1") {
